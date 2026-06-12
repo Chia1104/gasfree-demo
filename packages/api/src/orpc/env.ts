@@ -3,14 +3,18 @@ import * as z from "zod";
 
 export const env = createEnv({
   server: {
-    CDP_KEY_ID: z.string(),
-    CDP_KEY_SECRET: z.string(),
-    CDP_DOMAIN_ALLOWLIST: z.string().optional(),
+    GF_API_KEY: z.string(),
+    GF_API_SECRET: z.string(),
+    /** Provider host, e.g. `https://open.gasfree.io` (mainnet) or `https://open-test.gasfree.io` (Nile). */
+    GF_BASE_URL: z.url().default("https://open-test.gasfree.io"),
+    /** Network path prefix included in the signed path, e.g. `/tron` (mainnet) or `/nile` (Nile). */
+    GF_API_PATH_PREFIX: z.string().default("/nile"),
   },
   runtimeEnv: {
-    CDP_KEY_ID: process.env.CDP_KEY_ID,
-    CDP_KEY_SECRET: process.env.CDP_KEY_SECRET,
-    CDP_DOMAIN_ALLOWLIST: process.env.CDP_DOMAIN_ALLOWLIST,
+    GF_API_KEY: process.env.GF_API_KEY,
+    GF_API_SECRET: process.env.GF_API_SECRET,
+    GF_BASE_URL: process.env.GF_BASE_URL,
+    GF_API_PATH_PREFIX: process.env.GF_API_PATH_PREFIX,
   },
   skipValidation:
     process.env.SKIP_ENV_VALIDATION === "true" ||

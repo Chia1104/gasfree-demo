@@ -1,5 +1,6 @@
 import { sentry } from "@hono/sentry";
 import type { Hono, Schema } from "hono";
+import { getConnInfo } from "hono/bun";
 import { cors } from "hono/cors";
 import { ipRestriction } from "hono/ip-restriction";
 import { logger } from "hono/logger";
@@ -55,10 +56,19 @@ const bootstrap = <
   );
 
   app.use(
-    ipRestriction((c) => getClientIP(c.req.raw), {
-      denyList: splitString(env.IP_DENY_LIST),
-      allowList: splitString(env.IP_ALLOW_LIST),
-    })
+    ipRestriction(
+      (c) => {
+        const headerIP = getClientIP(c.req.raw);
+        if (headerIP !== "anonymous") {
+          return headerIP;
+        }
+        return getConnInfo(c).remote.address ?? "127.0.0.1";
+      },
+      {
+        denyList: splitString(env.IP_DENY_LIST),
+        allowList: splitString(env.IP_ALLOW_LIST),
+      }
+    )
   );
 
   return app;

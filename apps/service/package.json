@@ -4,11 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "nitro dev",
-    "build": "nitro build",
-    "node:start": "node .output/server/index.mjs",
-    "start": "bun run --bun .output/server/index.mjs",
-    "node:preview": "node --env-file=.env .output/server/index.mjs",
+    "dev": "bun run --hot src/server.ts",
     "type:check": "tsc --noEmit",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix"
@@ -17,6 +13,7 @@
     "@hono/sentry": "^1.2.2",
     "@hono/zod-validator": "^0.8.0",
     "@orpc/contract": "catalog:orpc",
+    "@orpc/openapi": "catalog:orpc",
     "@orpc/server": "catalog:orpc",
     "@repo/api": "workspace:*",
     "@repo/kv": "workspace:*",

@@ -41,6 +41,7 @@ catalogs:
   orpc:
     '@orpc/client': 1.13.4
     '@orpc/contract': 1.14.5
+    '@orpc/openapi': 1.14.5
     '@orpc/server': 1.14.5
     '@orpc/tanstack-query': 1.13.4
   oxc:
