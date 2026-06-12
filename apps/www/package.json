@@ -24,6 +24,7 @@
     "@tanstack/react-router": "catalog:tanstack",
     "@tanstack/router-plugin": "catalog:tanstack",
     "@tronweb3/walletconnect-tron": "^4.0.2",
+    "bignumber.js": "^11.1.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dayjs": "catalog:",

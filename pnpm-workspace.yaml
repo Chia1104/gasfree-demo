@@ -81,6 +81,15 @@ catalogs:
     vite: 8.0.16
     vite-tsconfig-paths: 5.1.4
 
+# `@hookform/resolvers/zod` (v5) statically imports `zod/v4/core` but does not
+# declare zod as a peer, so bare resolution falls back to a hoisted zod 3.x
+# (which lacks `./v4/core`). Declaring the peer makes pnpm link the importer's
+# zod 4.x instead.
+packageExtensions:
+  "@hookform/resolvers":
+    peerDependencies:
+      zod: "*"
+
 linkWorkspacePackages: true
 
 strictPeerDependencies: false
