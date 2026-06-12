@@ -1,0 +1,39 @@
+{
+  "name": "service",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nitro dev",
+    "build": "nitro build",
+    "node:start": "node .output/server/index.mjs",
+    "start": "bun run --bun .output/server/index.mjs",
+    "node:preview": "node --env-file=.env .output/server/index.mjs",
+    "type:check": "tsc --noEmit",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix"
+  },
+  "dependencies": {
+    "@hono/sentry": "^1.2.2",
+    "@hono/zod-validator": "^0.8.0",
+    "@orpc/contract": "catalog:orpc",
+    "@orpc/server": "catalog:orpc",
+    "@repo/api": "workspace:*",
+    "@repo/kv": "workspace:*",
+    "@repo/utils": "workspace:*",
+    "@t3-oss/env-core": "catalog:",
+    "better-all": "catalog:",
+    "dayjs": "catalog:",
+    "hono": "^4.12.25",
+    "hono-rate-limiter": "^0.5.3",
+    "ky": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@chiastack/tsconfig": "catalog:chiastack",
+    "@types/lodash": "catalog:",
+    "@types/node": "catalog:",
+    "bun-types": "catalog:",
+    "typescript": "catalog:"
+  }
+}
