@@ -1,3 +1,4 @@
+import { Typography } from "@heroui/react";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/")({
@@ -8,7 +9,7 @@ function RouteComponent() {
   return (
     <main className="flex h-screen w-full flex-col items-center justify-center gap-4">
       <section className="flex flex-col items-center justify-center">
-        <h1 className="text-2xl font-bold">Hello "/"!</h1>
+        <Typography type="h1">Hello "/"!</Typography>
       </section>
     </main>
   );
