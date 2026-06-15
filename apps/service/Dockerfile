@@ -16,7 +16,7 @@ WORKDIR /app
 RUN apk update && \
     apk add --no-cache \
     libc6-compat && \
-    npm install -g pnpm@next-11 turbo
+    npm install -g pnpm@next-11 turbo bun
 
 FROM builder-base AS pre-builder
 
@@ -43,13 +43,11 @@ RUN pnpm turbo run build --filter=service...
 
 FROM runner-base AS runner
 
-COPY --from=builder /app/apps/service/.output/server ./apps/service
+COPY --from=builder /app/apps/service/.output/server ./apps/service/.output/server
 
 ENV NODE_ENV=production \
     PORT=8080
 
-WORKDIR /app/apps/service
-
 EXPOSE 8080
 
-CMD [ ".output/server" ]
+CMD [ "apps/service/.output/server" ]

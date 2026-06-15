@@ -32,6 +32,7 @@
     "@types/lodash": "catalog:",
     "@types/node": "catalog:",
     "bun-types": "catalog:",
+    "tsdown": "catalog:",
     "typescript": "catalog:"
   }
 }
