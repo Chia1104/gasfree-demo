@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { createJSONStorage, persist } from "zustand/middleware";
 
 import { DEFAULT_GASFREE_NETWORK } from "@repo/api/orpc/network";
 import type { GasFreeNetwork } from "@repo/api/orpc/network";
@@ -15,7 +16,17 @@ interface NetworkState {
   setNetwork: (network: GasFreeNetwork) => void;
 }
 
-export const useNetworkStore = create<NetworkState>((set) => ({
-  network: DEFAULT_GASFREE_NETWORK,
-  setNetwork: (network) => set({ network }),
-}));
+export const useNetworkStore = create<NetworkState>()(
+  persist(
+    (set) => ({
+      network: DEFAULT_GASFREE_NETWORK,
+      setNetwork: (network) => set({ network }),
+    }),
+    {
+      name: "gasfree-network",
+      storage: createJSONStorage(() => localStorage),
+      version: 1,
+      partialize: (state) => ({ network: state.network }),
+    }
+  )
+);
