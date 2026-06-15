@@ -15,7 +15,7 @@ describe.skipIf(!hasCredentials)("GasFree live API (pipe validation)", () => {
     async () => {
       const { getAllTokens } = await import("./gasfree.service");
 
-      await expect(getAllTokens()).resolves.toBeDefined();
+      await expect(getAllTokens("nile")).resolves.toBeDefined();
     },
     NETWORK_TIMEOUT
   );
@@ -25,7 +25,7 @@ describe.skipIf(!hasCredentials)("GasFree live API (pipe validation)", () => {
     async () => {
       const { getAllProviders } = await import("./gasfree.service");
 
-      await expect(getAllProviders()).resolves.toBeDefined();
+      await expect(getAllProviders("nile")).resolves.toBeDefined();
     },
     NETWORK_TIMEOUT
   );

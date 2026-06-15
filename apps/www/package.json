@@ -20,6 +20,7 @@
     "@orpc/tanstack-query": "catalog:orpc",
     "@repo/api": "workspace:*",
     "@repo/utils": "workspace:*",
+    "@t3-oss/env-core": "catalog:",
     "@tanstack/react-query": "catalog:tanstack",
     "@tanstack/react-router": "catalog:tanstack",
     "@tanstack/router-plugin": "catalog:tanstack",
@@ -41,6 +42,7 @@
   },
   "devDependencies": {
     "@chiastack/tsconfig": "catalog:chiastack",
+    "@rolldown/plugin-babel": "^0.2.3",
     "@tailwindcss/postcss": "catalog:tailwindcss",
     "@tailwindcss/vite": "catalog:tailwindcss",
     "@types/node": "catalog:",

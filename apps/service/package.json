@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "bun run --hot src/server.ts",
+    "build": "bun build --compile --target=bun --minify-whitespace --minify-syntax --outfile .output/server src/server.ts",
     "type:check": "tsc --noEmit",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix"

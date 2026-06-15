@@ -1,8 +1,9 @@
 import { implement, ORPCError } from "@orpc/server";
 import { os } from "@orpc/server";
 
-import { routerContract } from "./router.contract";
-import { GasFreeApiError } from "./services/gasfree.service";
+import { routerContract } from "../router.contract";
+
+import { GasFreeApiError } from "./gasfree";
 
 export interface BaseContext {
   headers: Headers;

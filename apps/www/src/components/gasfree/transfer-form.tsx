@@ -29,6 +29,7 @@ import {
   truncateAddress,
 } from "@/lib/gasfree";
 import type { PermitTransferMessage } from "@/lib/gasfree";
+import { useNetworkStore } from "@/stores/network";
 
 const schema = z.object({
   token: z.string().min(1, "Please select a token"),
@@ -50,6 +51,7 @@ const getErrorMessage = (error: unknown): string => {
 };
 
 export function TransferForm({ address }: { address: string }) {
+  const network = useNetworkStore((state) => state.network);
   const tokensQuery = useTokens();
   const providersQuery = useProviders();
   const accountQuery = useAccountInfo(address);
@@ -108,9 +110,10 @@ export function TransferForm({ address }: { address: string }) {
         nonce: account.nonce,
       };
 
-      const sig = await signPermitTransfer(message);
+      const sig = await signPermitTransfer(network, message);
 
       await submit.mutateAsync({
+        network,
         requestId: crypto.randomUUID(),
         token: selectedToken.tokenAddress,
         serviceProvider: provider.address,

@@ -1,5 +1,6 @@
 import { Card } from "@heroui/react";
 
+import { NetworkSelect } from "@/components/gasfree/network-select";
 import { TransferForm } from "@/components/gasfree/transfer-form";
 import { WalletButton } from "@/components/gasfree/wallet-button";
 import { useWalletStore } from "@/stores/wallet";
@@ -19,7 +20,8 @@ export function GasFreeDemo() {
         <WalletButton />
       </Card.Header>
 
-      <Card.Content>
+      <Card.Content className="flex flex-col gap-5">
+        <NetworkSelect />
         {address ? (
           <TransferForm address={address} />
         ) : (

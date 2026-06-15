@@ -11,6 +11,14 @@ export type BaseResponse<TData> = Omit<z.infer<typeof BaseResponse>, "data"> & {
   data: TData | null;
 };
 
+export const GasFreeNetwork = {
+  Mainnet: "mainnet",
+  Nile: "nile",
+} as const;
+
+export type GasFreeNetwork =
+  (typeof GasFreeNetwork)[keyof typeof GasFreeNetwork];
+
 /**
  * Builds a typed GasFree response envelope schema, validating (and
  * transforming, when `data` carries a transform) the `data` payload with the

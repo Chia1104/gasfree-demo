@@ -1,14 +1,14 @@
-import https from "node:https";
+/// <reference types="vitest/config" />
+
 import { resolve } from "node:path";
 
-/// <reference types="vitest/config" />
+import babel from "@rolldown/plugin-babel";
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
-import viteReact from "@vitejs/plugin-react";
+import react, { reactCompilerPreset } from "@vitejs/plugin-react";
 import { defineConfig, loadEnv } from "vite";
 import type { ConfigEnv } from "vite";
 
-// https://vitejs.dev/config/
 export default ({ mode }: ConfigEnv) => {
   process.env = { ...process.env, ...loadEnv(mode, process.cwd()) };
 
@@ -17,11 +17,8 @@ export default ({ mode }: ConfigEnv) => {
   return defineConfig({
     plugins: [
       tanstackRouter({ autoCodeSplitting: true }),
-      viteReact({
-        babel: {
-          plugins: ["babel-plugin-react-compiler"],
-        },
-      }),
+      react(),
+      babel({ presets: [reactCompilerPreset()] }),
       tailwindcss(),
     ],
     test: {
@@ -36,17 +33,6 @@ export default ({ mode }: ConfigEnv) => {
     },
     define: {
       "import.meta.vitest": "undefined",
-    },
-    server: {
-      proxy: {
-        "/proxy": {
-          target:
-            process.env.VITE_APP_BACKEND_ENDPOINT ?? "http://localhost:8080",
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/proxy/, ""),
-          agent: new https.Agent(),
-        },
-      },
     },
   });
 };

@@ -1,11 +1,7 @@
 {
-  "extends": ["@chiastack/tsconfig/react.json"],
-  "include": ["src", "www.d.ts"],
-  "exclude": ["dist", "build", "node_modules"],
-  "compilerOptions": {
-    "allowImportingTsExtensions": true,
-    "paths": {
-      "@/*": ["./src/*"]
-    }
-  }
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+  ]
 }

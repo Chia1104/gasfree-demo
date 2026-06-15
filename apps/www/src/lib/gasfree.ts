@@ -1,10 +1,10 @@
 import BigNumber from "bignumber.js";
 
+import type { GasFreeNetwork } from "@repo/api/orpc/network";
+
 import { getTronWeb } from "./tron";
 
 export const GASFREE_SIGN_VERSION = 1;
-
-export type GasFreeNetwork = "mainnet" | "nile";
 
 const NETWORKS: Record<
   GasFreeNetwork,
@@ -20,18 +20,15 @@ const NETWORKS: Record<
   },
 };
 
-const envNetwork = (import.meta as { env?: { VITE_GASFREE_NETWORK?: string } })
-  .env?.VITE_GASFREE_NETWORK;
-
-export const GASFREE_NETWORK: GasFreeNetwork =
-  envNetwork === "mainnet" ? "mainnet" : "nile";
-
-export const PERMIT_DOMAIN = {
+/** Builds the EIP-712 signing domain for the chosen network. */
+export const getPermitDomain = (network: GasFreeNetwork) => ({
   name: "GasFreeController",
   version: "V1.0.0",
-  chainId: NETWORKS[GASFREE_NETWORK].chainId,
-  verifyingContract: NETWORKS[GASFREE_NETWORK].verifyingContract,
-};
+  chainId: NETWORKS[network].chainId,
+  verifyingContract: NETWORKS[network].verifyingContract,
+});
+
+export type PermitDomain = ReturnType<typeof getPermitDomain>;
 
 export const PERMIT_TYPES = {
   PermitTransfer: [
@@ -64,6 +61,7 @@ export interface PermitTransferMessage {
  * Returns the signature with the leading `0x` stripped, as the API expects.
  */
 export const signPermitTransfer = async (
+  network: GasFreeNetwork,
   message: PermitTransferMessage
 ): Promise<string> => {
   const tronWeb = getTronWeb();
@@ -74,9 +72,11 @@ export const signPermitTransfer = async (
     );
   }
 
+  const domain = getPermitDomain(network);
+
   try {
     const signature = await tronWeb.trx._signTypedData(
-      PERMIT_DOMAIN,
+      domain,
       PERMIT_TYPES,
       message
     );
@@ -90,7 +90,7 @@ export const signPermitTransfer = async (
     // does not match the active network — surface an actionable message.
     if (/invalid private key/i.test(detail)) {
       throw new Error(
-        `TronLink could not sign the authorization. Switch the wallet to the ${GASFREE_NETWORK} network (the signing domain uses chainId ${PERMIT_DOMAIN.chainId}) and make sure it is unlocked.`
+        `TronLink could not sign the authorization. Switch the wallet to the ${network} network (the signing domain uses chainId ${domain.chainId}) and make sure it is unlocked.`
       );
     }
 

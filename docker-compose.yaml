@@ -1,0 +1,76 @@
+services:
+  postgres:
+    container_name: gasfree-demo-postgres
+    image: pgvector/pgvector:pg18
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+    volumes:
+      - gasfree-demo-postgres:/var/lib/postgresql/data/pgdata
+    env_file:
+      - .env.global
+    environment:
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    container_name: gasfree-demo-redis
+    image: redis:alpine
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    volumes:
+      - gasfree-demo-redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  service:
+    container_name: gasfree-demo-service
+    build:
+      context: .
+      dockerfile: apps/service/Dockerfile
+      args:
+        TURBO_TEAM: ${TURBO_TEAM:-}
+        TURBO_TOKEN: ${TURBO_TOKEN:-}
+    restart: unless-stopped
+    ports:
+      - "3001:8080"
+    env_file:
+      - .env.global
+    environment:
+      - PORT=8080
+      - NODE_ENV=production
+      - CACHE_PROVIDER=redis
+      - REDIS_URI=redis://redis:6379
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-postgres}
+    depends_on:
+      - postgres
+      - redis
+
+  www:
+    container_name: gasfree-demo-www
+    build:
+      context: .
+      dockerfile: apps/www/Dockerfile
+      args:
+        TURBO_TEAM: ${TURBO_TEAM:-}
+        TURBO_TOKEN: ${TURBO_TOKEN:-}
+    restart: unless-stopped
+    ports:
+      - "3000:8080"
+    environment:
+      - PORT=8080
+      - HOST=0.0.0.0
+    depends_on:
+      - service
+
+volumes:
+  gasfree-demo-postgres:
+  gasfree-demo-redis:

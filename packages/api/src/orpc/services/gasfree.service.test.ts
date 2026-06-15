@@ -1,9 +1,9 @@
+import ky from "ky";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { gasFreeRequest } from "../repos/gasfree.repo";
+import { GasFreeApiError } from "../utils/gasfree";
 
 import {
-  GasFreeApiError,
   getAccountInfo,
   getAllProviders,
   getAllTokens,
@@ -14,16 +14,18 @@ vi.mock("../env", () => ({
   env: {
     GF_API_KEY: "test-key",
     GF_API_SECRET: "test-secret",
-    GF_BASE_URL: "https://open-test.gasfree.io",
-    GF_API_PATH_PREFIX: "/nile",
   },
 }));
 
-vi.mock("../repos/gasfree.repo", () => ({
-  gasFreeRequest: vi.fn(),
-}));
+vi.mock("ky", () => ({ default: vi.fn() }));
 
-const mockRequest = vi.mocked(gasFreeRequest);
+const mockKy = vi.mocked(ky);
+
+/** Stubs the next `ky` call to resolve with the given GasFree envelope. */
+const respond = (envelope: unknown) =>
+  mockKy.mockReturnValue({
+    json: () => Promise.resolve(envelope),
+  } as unknown as ReturnType<typeof ky>);
 
 /** Wraps a `data` payload in a successful GasFree envelope. */
 const ok = (data: unknown) => ({
@@ -34,7 +36,7 @@ const ok = (data: unknown) => ({
 });
 
 beforeEach(() => {
-  mockRequest.mockReset();
+  mockKy.mockReset();
 });
 
 describe("getAllTokens", () => {
@@ -53,26 +55,38 @@ describe("getAllTokens", () => {
     ],
   };
 
-  it("signs the prefixed path and returns the parsed tokens", async () => {
-    mockRequest.mockResolvedValue(ok(tokens));
+  it("signs the nile-prefixed url and returns the parsed tokens", async () => {
+    respond(ok(tokens));
 
-    const result = await getAllTokens();
+    const result = await getAllTokens("nile");
 
     expect(result).toEqual(tokens);
-    expect(mockRequest).toHaveBeenCalledWith({
-      baseUrl: "https://open-test.gasfree.io",
-      method: "GET",
-      path: "/nile/api/v1/config/token/all",
-      body: undefined,
-      apiKey: "test-key",
-      apiSecret: "test-secret",
-    });
+    expect(mockKy).toHaveBeenCalledWith(
+      "https://open-test.gasfree.io/nile/api/v1/config/token/all",
+      expect.objectContaining({
+        method: "GET",
+        headers: expect.objectContaining({
+          Authorization: expect.stringMatching(/^ApiKey test-key:/),
+        }),
+      })
+    );
+  });
+
+  it("targets the mainnet host and /tron prefix", async () => {
+    respond(ok(tokens));
+
+    await getAllTokens("mainnet");
+
+    expect(mockKy).toHaveBeenCalledWith(
+      "https://open.gasfree.io/tron/api/v1/config/token/all",
+      expect.objectContaining({ method: "GET" })
+    );
   });
 
   it("rejects payloads that do not match the schema", async () => {
-    mockRequest.mockResolvedValue(ok({ tokens: [{ tokenAddress: 123 }] }));
+    respond(ok({ tokens: [{ tokenAddress: 123 }] }));
 
-    await expect(getAllTokens()).rejects.toThrow();
+    await expect(getAllTokens("nile")).rejects.toThrow();
   });
 });
 
@@ -95,16 +109,14 @@ describe("getAllProviders", () => {
   };
 
   it("requests the provider list and returns the parsed providers", async () => {
-    mockRequest.mockResolvedValue(ok(providers));
+    respond(ok(providers));
 
-    const result = await getAllProviders();
+    const result = await getAllProviders("nile");
 
     expect(result).toEqual(providers);
-    expect(mockRequest).toHaveBeenCalledWith(
-      expect.objectContaining({
-        method: "GET",
-        path: "/nile/api/v1/config/provider/all",
-      })
+    expect(mockKy).toHaveBeenCalledWith(
+      "https://open-test.gasfree.io/nile/api/v1/config/provider/all",
+      expect.objectContaining({ method: "GET" })
     );
   });
 });
@@ -128,17 +140,15 @@ describe("getAccountInfo", () => {
     ],
   };
 
-  it("interpolates the account address into the path", async () => {
-    mockRequest.mockResolvedValue(ok(account));
+  it("interpolates the account address into the url", async () => {
+    respond(ok(account));
 
-    const result = await getAccountInfo(account.accountAddress);
+    const result = await getAccountInfo("nile", account.accountAddress);
 
     expect(result).toEqual(account);
-    expect(mockRequest).toHaveBeenCalledWith(
-      expect.objectContaining({
-        method: "GET",
-        path: `/nile/api/v1/address/${account.accountAddress}`,
-      })
+    expect(mockKy).toHaveBeenCalledWith(
+      `https://open-test.gasfree.io/nile/api/v1/address/${account.accountAddress}`,
+      expect.objectContaining({ method: "GET" })
     );
   });
 });
@@ -175,16 +185,14 @@ describe("getTransferDetail", () => {
       txnAmount: null,
       txnTotalCost: null,
     };
-    mockRequest.mockResolvedValue(ok(detail));
+    respond(ok(detail));
 
-    const result = await getTransferDetail(base.id);
+    const result = await getTransferDetail("nile", base.id);
 
     expect(result).toEqual(detail);
-    expect(mockRequest).toHaveBeenCalledWith(
-      expect.objectContaining({
-        method: "GET",
-        path: `/nile/api/v1/gasfree/${base.id}`,
-      })
+    expect(mockKy).toHaveBeenCalledWith(
+      `https://open-test.gasfree.io/nile/api/v1/gasfree/${base.id}`,
+      expect.objectContaining({ method: "GET" })
     );
   });
 
@@ -202,42 +210,39 @@ describe("getTransferDetail", () => {
       txnAmount: 1000000,
       txnTotalCost: 1001300,
     };
-    mockRequest.mockResolvedValue(ok(detail));
+    respond(ok(detail));
 
-    await expect(getTransferDetail(base.id)).resolves.toEqual(detail);
+    await expect(getTransferDetail("nile", base.id)).resolves.toEqual(detail);
   });
 
   it("rejects an unknown txnState", async () => {
-    mockRequest.mockResolvedValue(
-      ok({ ...base, txnState: "NOT_A_REAL_STATE" })
-    );
+    respond(ok({ ...base, txnState: "NOT_A_REAL_STATE" }));
 
-    await expect(getTransferDetail(base.id)).rejects.toThrow();
+    await expect(getTransferDetail("nile", base.id)).rejects.toThrow();
   });
 });
 
 describe("error envelopes", () => {
   it("throws GasFreeApiError with code and reason on a non-200 envelope", async () => {
-    mockRequest.mockResolvedValue({
+    respond({
       code: 400,
       reason: "GasFreeAddressNotFoundException",
       message: "not found",
       data: null,
     });
 
-    await expect(getAllTokens()).rejects.toMatchObject({
+    await expect(getAllTokens("nile")).rejects.toMatchObject({
       name: "GasFreeApiError",
       code: 400,
       reason: "GasFreeAddressNotFoundException",
       message: "not found",
     });
-    await expect(getAllTokens()).rejects.toBeInstanceOf(GasFreeApiError);
   });
 
   it("throws when a 200 envelope has null data", async () => {
-    mockRequest.mockResolvedValue(ok(null));
+    respond(ok(null));
 
-    await expect(getAccountInfo("Tabc")).rejects.toBeInstanceOf(
+    await expect(getAccountInfo("nile", "Tabc")).rejects.toBeInstanceOf(
       GasFreeApiError
     );
   });

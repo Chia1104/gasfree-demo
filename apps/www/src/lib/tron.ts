@@ -1,6 +1,6 @@
 import type {
-  PERMIT_DOMAIN,
   PERMIT_TYPES,
+  PermitDomain,
   PermitTransferMessage,
 } from "./gasfree";
 
@@ -8,7 +8,7 @@ export interface TronWebLike {
   defaultAddress?: { base58?: string | false; hex?: string | false };
   trx: {
     _signTypedData: (
-      domain: typeof PERMIT_DOMAIN,
+      domain: PermitDomain,
       types: typeof PERMIT_TYPES,
       message: PermitTransferMessage
     ) => Promise<string>;
