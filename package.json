@@ -53,7 +53,7 @@
     "cross-env": "10.1.0",
     "dotenv": "catalog:",
     "eslint-plugin-turbo": "^2.9.18",
-    "happy-dom": "^20.10.2",
+    "happy-dom": "^20.14.0",
     "husky": "^9.1.7",
     "jest-extended": "catalog:testing-library",
     "lint-staged": "^17.0.7",
